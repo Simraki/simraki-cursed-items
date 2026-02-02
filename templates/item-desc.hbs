@@ -1,0 +1,25 @@
+{{> ".description" collapsible=true label="simraki-cursed-items.CursedItemDescTitle" target="flags.simraki-cursed-items.curseDesc"
+    enriched=curseDescEnriched }}
+
+{{#*inline ".description"}}
+    <div class="card description {{#if collapsible}}collapsible{{/if}}
+        {{~#unless (lookup @root.expanded target)}} collapsed{{/unless}}
+        {{~#unless enriched}} empty{{/unless}}" data-target="{{ target }}"
+        {{~#if collapsible}} data-action="toggleCollapsed" data-expand-id="{{ target }}"{{/if}}>
+        <div class="header">
+            <span>{{ localize label }}</span>
+            {{#unless @root.locked}}
+                <button type="button" class="unbutton control-button always-interactive" data-action="editDescription"
+                        aria-label="{{ localize 'DND5E.DescriptionEdit' description=(localize label) }}"
+                        data-target="{{ target }}">
+                    <i class="fas fa-feather" inert></i>
+                </button>
+            {{/unless}}
+        </div>
+        <div class="details collapsible-content">
+            <div class="editor editor-content wrapper">
+                {{{ enriched }}}
+            </div>
+        </div>
+    </div>
+{{/inline}}

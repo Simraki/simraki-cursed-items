@@ -1,0 +1,34 @@
+{
+    "simraki-cursed-items": {
+        "CannotUnequip": "Ein verfluchter Gegenstand kann nicht abgelegt werden",
+        "CannotUnattune": "Die Einstimmung auf einen verfluchten Gegenstand kann nicht aufgehoben werden",
+        "Cursed": "Verflucht",
+        "CursedItemTitle": "Fluchdetails",
+        "CursedItemDescHint": "Die Fluchbeschreibung befindet sich im Reiter \"Beschreibung\"",
+        "CursedItemReveal": "Fluch enthüllen",
+        "CursedItemDescTitle": "Fluchbeschreibung",
+        "CursedItemEffectTitle": "Flucheffekt",
+        "CursedItemEffectDesc": "Dieser Effekt wird erst angezeigt, nachdem der Gegenstand identifiziert und der Fluch enthüllt wurde",
+        "CursedStage": {
+            "None": "Kein Fluch",
+            "Unrevealed": "Unenthüllter Fluch",
+            "Revealed": "Enthüllter Fluch"
+        },
+        "Settings": {
+            "ShowUnrevealedCursedEffects": {
+                "Name": "Unenthüllte Flucheffekte anzeigen",
+                "Hint": "Zeigt Effekte von enthüllten und unenthüllten Flüchen an"
+            },
+            "RequireAttunement": {
+                "Name": "Flüche erfordern Einstimmung",
+                "Hint": "Bereits bestehende Flüche auf Gegenständen ohne Einstimmung bleiben aktiv"
+            },
+            "BlockUnequip": {
+                "Name": "Ablegen verfluchter Gegenstände verhindern"
+            },
+            "BlockUnattune": {
+                "Name": "Entfernen der Bindung von verfluchten Gegenständen verhindern"
+            }
+        }
+    }
+}

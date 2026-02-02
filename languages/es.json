@@ -1,0 +1,34 @@
+{
+    "simraki-cursed-items": {
+        "CannotUnequip": "No puedes desequipar un objeto maldito",
+        "CannotUnattune": "No puedes perder la sintonización con un objeto maldito",
+        "Cursed": "Maldito",
+        "CursedItemTitle": "Detalles de la maldición",
+        "CursedItemDescHint": "La descripción de la maldición se encuentra en la pestaña \"Descripción\"",
+        "CursedItemReveal": "Revelar maldición",
+        "CursedItemDescTitle": "Descripción de la maldición",
+        "CursedItemEffectTitle": "Efecto de la maldición",
+        "CursedItemEffectDesc": "Este efecto solo se muestra después de identificar el objeto y revelar la maldición",
+        "CursedStage": {
+            "None": "Sin maldición",
+            "Unrevealed": "Maldición no revelada",
+            "Revealed": "Maldición revelada"
+        },
+        "Settings": {
+            "ShowUnrevealedCursedEffects": {
+                "Name": "Mostrar efectos de maldiciones no reveladas",
+                "Hint": "Muestra efectos de maldiciones reveladas y no reveladas"
+            },
+            "RequireAttunement": {
+                "Name": "Las maldiciones requieren sintonización",
+                "Hint": "Las maldiciones existentes en objetos sin sintonización seguirán activas"
+            },
+            "BlockUnequip": {
+                "Name": "Impedir desequipar objetos malditos"
+            },
+            "BlockUnattune": {
+                "Name": "Impedir eliminar la vinculación de objetos malditos"
+            }
+        }
+    }
+}

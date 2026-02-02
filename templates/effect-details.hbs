@@ -1,0 +1,12 @@
+<fieldset class="curse-details-section">
+    <legend>{{localize "simraki-cursed-items.CursedItemTitle"}}</legend>
+
+    <div class="form-group">
+        <label>{{localize "simraki-cursed-items.CursedItemEffectTitle"}}</label>
+        <div class="form-fields">
+            <input type="checkbox" name="flags.simraki-cursed-items.isCursedItemEffect" data-dtype="Boolean"
+                   {{#if isCursed}}checked{{/if}}>
+        </div>
+        <p class="hint">{{localize "simraki-cursed-items.CursedItemEffectDesc"}}</p>
+    </div>
+</fieldset>

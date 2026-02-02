@@ -1,0 +1,34 @@
+{
+    "simraki-cursed-items": {
+        "CannotUnequip": "저주받은 아이템을 해제할 수 없습니다",
+        "CannotUnattune": "저주받은 아이템과의 조율을 해제할 수 없습니다",
+        "Cursed": "저주받음",
+        "CursedItemTitle": "저주 세부 정보",
+        "CursedItemDescHint": "저주 설명은 \"설명\" 탭에 있습니다",
+        "CursedItemReveal": "저주 공개",
+        "CursedItemDescTitle": "저주 설명",
+        "CursedItemEffectTitle": "저주 효과",
+        "CursedItemEffectDesc": "이 효과는 아이템을 식별하고 저주를 공개한 후에만 표시됩니다",
+        "CursedStage": {
+            "None": "저주 없음",
+            "Unrevealed": "공개되지 않은 저주",
+            "Revealed": "공개된 저주"
+        },
+        "Settings": {
+            "ShowUnrevealedCursedEffects": {
+                "Name": "공개되지 않은 저주 효과 표시",
+                "Hint": "공개된 저주와 공개되지 않은 저주의 효과를 모두 표시합니다"
+            },
+            "RequireAttunement": {
+                "Name": "저주는 조율 필요",
+                "Hint": "조율이 없는 기존 저주는 계속 활성 상태로 유지됩니다"
+            },
+            "BlockUnequip": {
+                "Name": "저주받은 아이템 해제 방지"
+            },
+            "BlockUnattune": {
+                "Name": "저주받은 아이템의 조율 해제 방지"
+            }
+        }
+    }
+}

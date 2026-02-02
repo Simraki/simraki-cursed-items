@@ -1,0 +1,34 @@
+{
+    "simraki-cursed-items": {
+        "CannotUnequip": "Impossible de retirer un objet maudit",
+        "CannotUnattune": "Impossible de rompre l'harmonisation avec un objet maudit",
+        "Cursed": "Maudit",
+        "CursedItemTitle": "Détails de la malédiction",
+        "CursedItemDescHint": "La description de la malédiction se trouve dans l’onglet \"Description\"",
+        "CursedItemReveal": "Révéler la malédiction",
+        "CursedItemDescTitle": "Description de la malédiction",
+        "CursedItemEffectTitle": "Effet de la malédiction",
+        "CursedItemEffectDesc": "Cet effet n’est affiché qu’après l’identification de l’objet et la révélation de la malédiction",
+        "CursedStage": {
+            "None": "Aucune malédiction",
+            "Unrevealed": "Malédiction non révélée",
+            "Revealed": "Malédiction révélée"
+        },
+        "Settings": {
+            "ShowUnrevealedCursedEffects": {
+                "Name": "Afficher les effets des malédictions non révélées",
+                "Hint": "Affiche les effets des malédictions révélées et non révélées"
+            },
+            "RequireAttunement": {
+                "Name": "Les malédictions nécessitent une harmonisation",
+                "Hint": "Les malédictions existantes sur des objets sans harmonisation restent actives"
+            },
+            "BlockUnequip": {
+                "Name": "Empêcher de retirer les objets maudits"
+            },
+            "BlockUnattune": {
+                "Name": "Empêcher de rompre l'harmonisation des objets maudits"
+            }
+        }
+    }
+}
