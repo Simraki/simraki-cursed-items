@@ -1,7 +1,7 @@
 {
     "simraki-cursed-items": {
-        "CannotUnequip": "You cannot unequip a cursed item",
-        "CannotUnattune": "You cannot unattune from a cursed item",
+        "BlockUnequip": "You cannot unequip a cursed item",
+        "BlockUnattune": "You cannot unattune from a cursed item",
         "Cursed": "Cursed",
         "CursedItemTitle": "Curse Details",
         "CursedItemDescHint": "The curse description is located in the \"Description\" tab",
@@ -21,7 +21,7 @@
             },
             "RequireAttunement": {
                 "Name": "Curses require attunement",
-                "Hint": "Does not affect existing curses on items without attunement — they remain active"
+                "Hint": "Does not affect existing curses on items without attunement - they remain active"
             },
             "BlockUnequip": {
                 "Name": "Prevent unequipping cursed items"

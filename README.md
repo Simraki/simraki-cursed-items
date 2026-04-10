@@ -10,7 +10,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
 **Simraki's Cursed Items** adds support for **cursed items** in **D&D 5e**: hidden curse details,
-curse-only effects, and configurable gameplay restrictions.
+curse effects, and configurable gameplay restrictions.
 
 ---
 
@@ -60,11 +60,25 @@ Requirements:
 
 ---
 
-## Requirements
+## Compatibility
 
 - Foundry VTT **v13+**
 - D&D 5e system
-- **libWrapper** (for effect hiding)
+- **libWrapper** - required for the effect list filtering
+- Visual Active Effects - fully supported. Unrevealed cursed effects are filtered out
+
+---
+
+## Troubleshooting
+
+- **Curse section not showing on item sheet**
+    - Ensure the item has `magical` property. The module only adds UI to magic items
+
+- **Players see unrevealed curses**
+    - Check the module setting `Show Unrevealed Effects`
+
+- **How do I hide an effect so it appears cursed?**
+    - Mark Active Effect as cursed in its settings window (check `Curse Effect` checkbox).
 
 ---
 

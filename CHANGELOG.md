@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.0 – 2026-02-02
+## 0.1.0 - 2026-04-10
 
 - Curse stages for items
 - Dedicated Curse Description section on item sheets
@@ -12,3 +12,4 @@
     - Block breaking attunement on cursed items
     - Restrict curses to attuned items only
 - Localization-ready architecture
+- VAE support

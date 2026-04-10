@@ -1,27 +1,23 @@
-import { CURSED_STAGE, FLAGS, MODULE_ID, SETTING, VALID_TYPES } from './config.js'
-import { getSetting, registerSettings } from './settings.js'
+import { CURSED_STAGE, CURSED_STAGE_VALUES, FLAGS, MODULE_ID, SETTING, TEMPLATES, VALID_TYPES } from './config.js'
+import { registerSettings } from './settings.js'
+import { getCursedStage, getIsCursed, getSetting } from './utils.js'
+import { updateItemBlockActions } from './blockHooks.js'
+
+// -----------------------
+//      START HOOKS
+// -----------------------
 
 Hooks.once('init', async () => {
     registerSettings()
 
-    await foundry.applications.handlebars.loadTemplates([
-        `modules/${MODULE_ID}/templates/item-inline-details.hbs`,
-        `modules/${MODULE_ID}/templates/item-desc.hbs`,
-        `modules/${MODULE_ID}/templates/effect-details.hbs`,
-    ])
+    await foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES))
 
     // eslint-disable-next-line no-console
     console.log(`[${MODULE_ID}] initialized.`)
 })
 
 Hooks.once('ready', () => {
-    if (
-        getSetting(SETTING.BLOCK_UNEQUIP) ||
-        (getSetting(SETTING.REQUIRE_ATTUNEMENT) && getSetting(SETTING.BLOCK_BREAKS_ATTUNE))
-    ) {
-        registerBlockActionsOnCursedItem()
-    }
-
+    updateItemBlockActions()
     if (game.modules.get('lib-wrapper')?.active) {
         libWrapper.register(
             MODULE_ID,
@@ -29,118 +25,124 @@ Hooks.once('ready', () => {
             prepareCategoriesWrapper,
             'WRAPPER',
         )
+    } else {
+        // eslint-disable-next-line no-console
+        console.warn(`[${MODULE_ID}] lib-wrapper not active, prepareCategories wrapper disabled.`)
     }
 })
 
-Hooks.on('renderItemSheet5e', async (app, html, data) => {
-    const item = app.item
-    const isGM = game.user.isGM
-
-    if (!item || (!isGM && item.system.identified === false)) return
-    if (!VALID_TYPES.includes(item.type)) return
-
-    const hasMagical = item.system.properties?.has('mgc') ?? false
-    if (!hasMagical) return
-
-    const hasAttunement = item.system.attunement && ['required', 'optional'].includes(item.system.attunement)
-    if (getSetting(SETTING.REQUIRE_ATTUNEMENT) && !hasAttunement) return
-
-    const cursedStage = item.getFlag(MODULE_ID, FLAGS.ITEM.CURSED) ?? CURSED_STAGE.NONE
-
-    if (!isGM && cursedStage !== CURSED_STAGE.REVEALED) return
-
-    const detailsBlock = app.element?.querySelector('.tab[data-tab="details"] > fieldset:nth-child(1)')
-    const magicalBlock = detailsBlock?.querySelector('div.form-group:has(select[name="system.attunement"])')
-    const descBlock = app.element?.querySelector('.tab[data-tab="description"] > .item-descriptions')
-
-    if (!descBlock || !magicalBlock) return
-
-    const hasCurseDetails = detailsBlock.querySelector('.cursed-details-section')
-    if (!hasCurseDetails) {
-        const cursedStageField = new foundry.data.fields.StringField(
-            { gmOnly: true, required: true, initial: CURSED_STAGE.NONE },
-            { name: `flags.${MODULE_ID}.${FLAGS.ITEM.CURSED}` },
-        )
-        const cursedStages = {
-            [CURSED_STAGE.NONE]: `${MODULE_ID}.CursedStage.None`,
-            [CURSED_STAGE.UNREVEALED]: `${MODULE_ID}.CursedStage.Unrevealed`,
-            [CURSED_STAGE.REVEALED]: `${MODULE_ID}.CursedStage.Revealed`,
-        }
-
-        const itemDetailsHTML = await foundry.applications.handlebars.renderTemplate(
-            `modules/${MODULE_ID}/templates/item-inline-details.hbs`,
-            { source: item, cursedStageField, cursedStages },
-        )
-
-        magicalBlock.insertAdjacentHTML('afterend', itemDetailsHTML)
-    }
-
-    const curseDescSelector = `.description[data-target="flags.${MODULE_ID}.${FLAGS.ITEM.DESC}"]`
-    const hasCurseDesc = descBlock.querySelector(curseDescSelector)
-    if (cursedStage !== CURSED_STAGE.NONE && !hasCurseDesc) {
-        const curseDesc = item.getFlag(MODULE_ID, FLAGS.ITEM.DESC) ?? ''
-        const enrichmentOptions = { secrets: item.isOwner, relativeTo: item, rollData: item.getRollData() }
-        const curseDescEnriched = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
-            curseDesc,
-            enrichmentOptions,
-        )
-
-        const itemDescHTML = await foundry.applications.handlebars.renderTemplate(
-            `modules/${MODULE_ID}/templates/item-desc.hbs`,
-            { curseDescEnriched },
-        )
-
-        descBlock.insertAdjacentHTML('beforeend', itemDescHTML)
-    }
-    app.setPosition({ height: 'auto' })
-})
-
-Hooks.on('renderActiveEffectConfig', async (app, html, data) => {
-    const tab = app.element?.querySelector('.tab[data-tab="details"]')
-    if (!tab) return
-
-    const isCursed = app.document.getFlag(MODULE_ID, FLAGS.EFFECT.CURSED) ?? false
-    const effectDetailsHTML = await foundry.applications.handlebars.renderTemplate(
-        `modules/${MODULE_ID}/templates/effect-details.hbs`,
-        { isCursed },
-    )
-    tab.insertAdjacentHTML('beforeend', effectDetailsHTML)
-    app.setPosition({ height: 'auto' })
-})
-
-function registerBlockActionsOnCursedItem() {
-    Hooks.on('preUpdateItem', (item, changes) => {
-        if (game.user.isGM) return
-        if (!item.isOwned) return
-
-        const cursedStage = item.getFlag(MODULE_ID, FLAGS.ITEM.CURSED) ?? CURSED_STAGE.NONE
-        if (cursedStage === CURSED_STAGE.NONE) return
-
-        const isUnequipBlocked = getSetting(SETTING.BLOCK_UNEQUIP)
-        const isUnattuneBlocked = getSetting(SETTING.REQUIRE_ATTUNEMENT) && getSetting(SETTING.BLOCK_BREAKS_ATTUNE)
-
-        if (isUnequipBlocked && changes.system?.equipped === false) {
-            ui.notifications.warn(game.i18n.localize('simraki-cursed-items.CannotUnequip'))
-            return false
-        }
-
-        if (isUnattuneBlocked && changes.system?.attuned === false) {
-            ui.notifications.warn(game.i18n.localize('simraki-cursed-items.CannotUnattune'))
-            return false
-        }
-    })
-}
+// -----------------------
+// HIDE EFFECTS ON ITEM TAB
+// -----------------------
 
 function prepareCategoriesWrapper(original, effects, ...args) {
     if (game.user.isGM || getSetting(SETTING.SHOW_UNREVEALED_EFFECTS)) {
         return original(effects, ...args)
     }
 
-    const filteredEffects = effects.filter((effect) => {
-        const isCursed = effect.flags[MODULE_ID]?.[FLAGS.EFFECT.CURSED] ?? false
-        const cursedStage = effect.parent?.flags?.[MODULE_ID]?.[FLAGS.ITEM.CURSED] ?? CURSED_STAGE.NONE
-        return cursedStage !== CURSED_STAGE.UNREVEALED || !isCursed
+    const filtered = effects.filter((effect) => {
+        if (!getIsCursed(effect)) return true
+        return getCursedStage(effect.parent) !== CURSED_STAGE.UNREVEALED
     })
 
-    return original(filteredEffects, ...args)
+    return original(filtered, ...args)
 }
+
+// -----------------------
+//      ITEM DETAILS
+// -----------------------
+
+Hooks.on('renderItemSheet5e', async (app, html, data) => {
+    const item = app.item
+    if (!item || !VALID_TYPES.has(item.type)) return
+
+    if (!canViewCurse(item)) return
+
+    const detailsBlock = app.element?.querySelector('.tab[data-tab="details"] > fieldset:nth-child(1)')
+    const magicalBlock = detailsBlock?.querySelector('div.form-group:has(select[name="system.attunement"])')
+    const descBlock = app.element?.querySelector('.tab[data-tab="description"] > .item-descriptions')
+
+    if (!detailsBlock || !magicalBlock || !descBlock) return
+
+    await Promise.all([insertCurseDetails(app, item, detailsBlock, magicalBlock), insertCurseDesc(item, descBlock)])
+
+    app.setPosition({ height: 'auto' })
+})
+
+function canViewCurse(item) {
+    const system = item.system
+    if (!system.properties?.has('mgc')) return false
+
+    const requireAttune = getSetting(SETTING.REQUIRE_ATTUNEMENT)
+    const hasAttunement = ['required', 'optional'].includes(system.attunement)
+    if (requireAttune && !hasAttunement) return false
+
+    if (game.user.isGM) return true
+    if (item.system.identified === false) return false
+    return getCursedStage(item) === CURSED_STAGE.REVEALED
+}
+
+async function insertCurseDetails(app, item, detailsBlock, magicalBlock) {
+    const hasCurseDetails = detailsBlock.querySelector('.cursed-details-section')
+    if (hasCurseDetails) return
+
+    const stageField = new foundry.data.fields.StringField(
+        { gmOnly: true, required: true, initial: CURSED_STAGE.NONE },
+        { name: `flags.${MODULE_ID}.${FLAGS.ITEM.CURSED}` },
+    )
+
+    const itemDetailsHTML = await foundry.applications.handlebars.renderTemplate(TEMPLATES.ITEM_DETAIL, {
+        source: item,
+        stageField,
+        stages: CURSED_STAGE_VALUES,
+        disabled: !app.isEditMode,
+    })
+
+    magicalBlock.insertAdjacentHTML('afterend', itemDetailsHTML)
+}
+
+async function insertCurseDesc(item, descBlock) {
+    const hasCurseDesc = descBlock.querySelector(`.description[data-target="flags.${MODULE_ID}.${FLAGS.ITEM.DESC}"]`)
+    if (hasCurseDesc || getCursedStage(item) === CURSED_STAGE.NONE) return
+
+    const enriched = await foundry.applications.ux.TextEditor.implementation.enrichHTML(
+        item.getFlag(MODULE_ID, FLAGS.ITEM.DESC) ?? '',
+        { secrets: item.isOwner, relativeTo: item, rollData: item.getRollData() },
+    )
+    const itemDescHTML = await foundry.applications.handlebars.renderTemplate(TEMPLATES.ITEM_DESC, {
+        enriched,
+    })
+    descBlock.insertAdjacentHTML('beforeend', itemDescHTML)
+}
+
+// -----------------------
+//     ACTIVE EFFECTS
+// -----------------------
+
+Hooks.on('renderActiveEffectConfig', async (app, html, data) => {
+    const tab = app.element?.querySelector('.tab[data-tab="details"]')
+    if (!tab) return
+
+    const isCursed = getIsCursed(app.document)
+    const effectDetailsHTML = await foundry.applications.handlebars.renderTemplate(TEMPLATES.EFFECT_DETAIL, {
+        isCursed,
+    })
+    tab.insertAdjacentHTML('beforeend', effectDetailsHTML)
+    app.setPosition({ height: 'auto' })
+})
+
+// -----------------------
+//  VISUAL ACTIVE EFFECTS
+// -----------------------
+
+Hooks.on('visual-active-effects.prepareActiveEffectContext', (effect, context) => {
+    if (game.user.isGM || getSetting(SETTING.SHOW_UNREVEALED_EFFECTS)) return
+
+    const parent = effect.parent
+    if (!parent || !VALID_TYPES.has(parent.type)) return true
+
+    const stage = getCursedStage(parent)
+    const isCursedItemEffect = getIsCursed(effect)
+
+    return stage !== CURSED_STAGE.UNREVEALED || !isCursedItemEffect
+})

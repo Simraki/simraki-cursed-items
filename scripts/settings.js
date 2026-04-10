@@ -1,4 +1,5 @@
 import { MODULE_ID, SETTING } from './config.js'
+import { updateItemBlockActions } from './blockHooks.js'
 
 function onRenderSettingsConfig(app) {
     if (!game.user.isGM) return
@@ -23,7 +24,7 @@ export function registerSettings() {
         default: false,
         scope: 'world',
         config: true,
-        requiresReload: true,
+        onChange: updateItemBlockActions,
     })
 
     game.settings.register(MODULE_ID, SETTING.SHOW_UNREVEALED_EFFECTS, {
@@ -42,7 +43,7 @@ export function registerSettings() {
         default: true,
         scope: 'world',
         config: true,
-        requiresReload: true,
+        onChange: updateItemBlockActions,
     })
 
     game.settings.register(MODULE_ID, SETTING.BLOCK_BREAKS_ATTUNE, {
@@ -51,10 +52,6 @@ export function registerSettings() {
         default: false,
         scope: 'world',
         config: true,
-        requiresReload: true,
+        onChange: updateItemBlockActions,
     })
-}
-
-export function getSetting(key) {
-    return game.settings.get(MODULE_ID, key)
 }
