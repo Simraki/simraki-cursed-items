@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.0 - 2026-07-09
+
+- Add Tidy5E support
+
 ## 0.1.0 - 2026-04-10
 
 - Curse stages for items

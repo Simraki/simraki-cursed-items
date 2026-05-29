@@ -1,12 +1,13 @@
 {
     "id": "simraki-cursed-items",
     "title": "Simraki's Cursed Items",
-    "description": "Support for cursed items in D&D 5e",
-    "version": "0.1.0",
+    "description": "Support for cursed items in D&amp;D 5e",
+    "version": "0.2.0",
     "authors": [
         {
             "name": "Simraki",
-            "url": "https://github.com/Simraki/"
+            "url": "https://github.com/Simraki/",
+            "flags": {}
         }
     ],
     "license": "MIT",
@@ -36,20 +37,23 @@
             }
         ]
     },
-    "esmodules": ["./scripts/main.js"],
+    "esmodules": ["scripts/main.js"],
     "languages": [
         {
             "lang": "en",
             "name": "English",
-            "path": "./languages/en.json"
+            "path": "languages/en.json",
+            "flags": {}
         },
         {
             "lang": "ru",
             "name": "Русский",
-            "path": "./languages/ru.json"
+            "path": "languages/ru.json",
+            "flags": {}
         }
     ],
     "url": "https://github.com/Simraki/simraki-cursed-items",
     "manifest": "https://github.com/Simraki/simraki-cursed-items/releases/latest/download/module.json",
-    "download": "https://github.com/Simraki/simraki-cursed-items/releases/latest/download/module.zip"
+    "download": "https://github.com/Simraki/simraki-cursed-items/releases/download/latest/module.zip",
+    "flags": {}
 }

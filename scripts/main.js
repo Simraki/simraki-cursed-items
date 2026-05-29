@@ -13,7 +13,7 @@ Hooks.once('init', async () => {
     await foundry.applications.handlebars.loadTemplates(Object.values(TEMPLATES))
 
     // eslint-disable-next-line no-console
-    console.log(`[${MODULE_ID}] initialized.`)
+    console.log(`[${MODULE_ID}] initialized`)
 })
 
 Hooks.once('ready', () => {
@@ -27,7 +27,10 @@ Hooks.once('ready', () => {
         )
     } else {
         // eslint-disable-next-line no-console
-        console.warn(`[${MODULE_ID}] lib-wrapper not active, prepareCategories wrapper disabled.`)
+        console.warn(`[${MODULE_ID}] lib-wrapper not active, prepareCategories wrapper disabled`)
+    }
+    if (game.modules.get('tidy5e-sheet')?.active) {
+        registerTidy5eHooks()
     }
 })
 
@@ -55,7 +58,6 @@ function prepareCategoriesWrapper(original, effects, ...args) {
 Hooks.on('renderItemSheet5e', async (app, html, data) => {
     const item = app.item
     if (!item || !VALID_TYPES.has(item.type)) return
-
     if (!canViewCurse(item)) return
 
     const detailsBlock = app.element?.querySelector('.tab[data-tab="details"] > fieldset:nth-child(1)')
@@ -146,3 +148,48 @@ Hooks.on('visual-active-effects.prepareActiveEffectContext', (effect, context) =
 
     return stage !== CURSED_STAGE.UNREVEALED || !isCursedItemEffect
 })
+
+// -----------------------
+//      TIDY 5E SUPPORT
+// -----------------------
+export function registerTidy5eHooks() {
+    Hooks.on(`tidy5e-sheet.prepareSheetContext`, async (document, app, context) => {
+        if (document.documentName !== 'Item') return
+
+        const item = app.item
+        if (!item || !VALID_TYPES.has(item.type)) return
+        if (!canViewCurse(item)) return
+        if (getCursedStage(item) === CURSED_STAGE.NONE) return
+
+        const flagPath = `flags.${MODULE_ID}.${FLAGS.ITEM.DESC}`
+        const rawContent = item.getFlag(MODULE_ID, FLAGS.ITEM.DESC) ?? ''
+
+        context.itemDescriptions.push({
+            enriched: rawContent,
+            content: rawContent,
+            field: flagPath,
+            label: game.i18n.localize(`${MODULE_ID}.CursedItemDescTitle`),
+        })
+    })
+
+    Hooks.on('renderItemSheetV2', async (app, html, data) => {
+        // Проверяем, что это лист Tidy 5e
+        if (!html.classList.contains('tidy5e-sheet')) return
+
+        const item = app.item
+        if (!item || !VALID_TYPES.has(item.type)) return
+        if (!canViewCurse(item)) return
+
+        const detailsBlock = html.querySelector(
+            '.tidy-tab.details > fieldset:has(select[data-tidy-field="system.attunement"])',
+        )
+        const magicalBlock = detailsBlock?.querySelector(
+            'div.form-group:has(select[data-tidy-field="system.attunement"])',
+        )
+        const descBlock = html.querySelector('.tidy-tab.description > .item-descriptions')
+
+        if (!detailsBlock || !magicalBlock || !descBlock) return
+
+        await Promise.all([insertCurseDetails(app, item, detailsBlock, magicalBlock)])
+    })
+}
