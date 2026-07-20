@@ -52,6 +52,23 @@ function prepareCategoriesWrapper(original, effects, ...args) {
 }
 
 // -----------------------
+//          UTILS
+// -----------------------
+
+function canViewCurse(item) {
+    const system = item.system
+    if (!system.properties?.has('mgc')) return false
+
+    const requireAttune = getSetting(SETTING.REQUIRE_ATTUNEMENT)
+    const hasAttunement = ['required', 'optional'].includes(system.attunement)
+    if (requireAttune && !hasAttunement) return false
+
+    if (game.user.isGM) return true
+    if (item.system.identified === false) return false
+    return getCursedStage(item) === CURSED_STAGE.REVEALED
+}
+
+// -----------------------
 //      ITEM DETAILS
 // -----------------------
 
@@ -70,19 +87,6 @@ Hooks.on('renderItemSheet5e', async (app, html, data) => {
 
     app.setPosition({ height: 'auto' })
 })
-
-function canViewCurse(item) {
-    const system = item.system
-    if (!system.properties?.has('mgc')) return false
-
-    const requireAttune = getSetting(SETTING.REQUIRE_ATTUNEMENT)
-    const hasAttunement = ['required', 'optional'].includes(system.attunement)
-    if (requireAttune && !hasAttunement) return false
-
-    if (game.user.isGM) return true
-    if (item.system.identified === false) return false
-    return getCursedStage(item) === CURSED_STAGE.REVEALED
-}
 
 async function insertCurseDetails(app, item, detailsBlock, magicalBlock) {
     const hasCurseDetails = detailsBlock.querySelector('.cursed-details-section')
@@ -152,44 +156,52 @@ Hooks.on('visual-active-effects.prepareActiveEffectContext', (effect, context) =
 // -----------------------
 //      TIDY 5E SUPPORT
 // -----------------------
+
 export function registerTidy5eHooks() {
-    Hooks.on(`tidy5e-sheet.prepareSheetContext`, async (document, app, context) => {
-        if (document.documentName !== 'Item') return
-
-        const item = app.item
-        if (!item || !VALID_TYPES.has(item.type)) return
-        if (!canViewCurse(item)) return
-        if (getCursedStage(item) === CURSED_STAGE.NONE) return
-
-        const flagPath = `flags.${MODULE_ID}.${FLAGS.ITEM.DESC}`
-        const rawContent = item.getFlag(MODULE_ID, FLAGS.ITEM.DESC) ?? ''
-
-        context.itemDescriptions.push({
-            enriched: rawContent,
-            content: rawContent,
-            field: flagPath,
-            label: game.i18n.localize(`${MODULE_ID}.CursedItemDescTitle`),
-        })
-    })
-
-    Hooks.on('renderItemSheetV2', async (app, html, data) => {
-        // Проверяем, что это лист Tidy 5e
-        if (!html.classList.contains('tidy5e-sheet')) return
-
-        const item = app.item
-        if (!item || !VALID_TYPES.has(item.type)) return
-        if (!canViewCurse(item)) return
-
-        const detailsBlock = html.querySelector(
-            '.tidy-tab.details > fieldset:has(select[data-tidy-field="system.attunement"])',
+    Hooks.once('tidy5e-sheet.ready', (api) => {
+        const stageField = new foundry.data.fields.StringField(
+            { gmOnly: true, required: true, initial: CURSED_STAGE.NONE },
+            { name: `flags.${MODULE_ID}.${FLAGS.ITEM.CURSED}` },
         )
-        const magicalBlock = detailsBlock?.querySelector(
-            'div.form-group:has(select[data-tidy-field="system.attunement"])',
+
+        api.registerItemContent(
+            new api.models.HandlebarsContent({
+                path: TEMPLATES.ITEM_DETAIL,
+                enabled: (context) => {
+                    const item = context.item
+                    if (!item || !VALID_TYPES.has(item.type)) return false
+                    if (!canViewCurse(item)) return false
+
+                    return true
+                },
+                getData: (context) => {
+                    const item = context.item
+
+                    if (item && getCursedStage(item) !== CURSED_STAGE.NONE) {
+                        const flagPath = `flags.${MODULE_ID}.${FLAGS.ITEM.DESC}`
+                        const rawContent = item.getFlag(MODULE_ID, FLAGS.ITEM.DESC) ?? ''
+
+                        context.itemDescriptions.push({
+                            enriched: rawContent,
+                            content: rawContent,
+                            field: flagPath,
+                            label: game.i18n.localize(`${MODULE_ID}.CursedItemDescTitle`),
+                        })
+                    }
+
+                    return {
+                        ...context,
+                        source: context.item,
+                        stageField,
+                        stages: CURSED_STAGE_VALUES,
+                        disabled: !context.editable,
+                    }
+                },
+                injectParams: {
+                    selector: 'div.form-group.split-group:has(select[data-tidy-field="system.attunement"])',
+                    position: 'afterend',
+                },
+            }),
         )
-        const descBlock = html.querySelector('.tidy-tab.description > .item-descriptions')
-
-        if (!detailsBlock || !magicalBlock || !descBlock) return
-
-        await Promise.all([insertCurseDetails(app, item, detailsBlock, magicalBlock)])
     })
 }

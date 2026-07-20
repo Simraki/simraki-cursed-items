@@ -66,6 +66,7 @@ Requirements:
 - D&D 5e system
 - **libWrapper** - required for the effect list filtering
 - Visual Active Effects - fully supported. Unrevealed cursed effects are filtered out
+- Tidy 5e Sheets
 
 ---
 
